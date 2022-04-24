@@ -1,9 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routes = require('./routes/users');
+const bodyParser = require('body-parser');
 
 const { PORT = 3000 } = process.env;
 const app = express();
+app.use(express.json());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -11,46 +15,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-const cardSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-  },
-  link: {
-    type: String,
-    required: true,
-  },
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true,
-  },
-  likes: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'user',
-    default: [],
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-app.use('/', routes);
+app.use("/", require("./routes/users"));
+app.use("/", require("./routes/cards"));
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log('Ссылка на сервер:');
 });
 
-// app.get('/users', (req, res) => {
-//   res.send(userSchema);
-// });
-
-// app.get('/users/:userId',);
-
-// app.post('/users', createUser);
-
-module.exports = mongoose.model('card', cardSchema);
