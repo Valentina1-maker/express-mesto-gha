@@ -1,90 +1,56 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
-const { userSchema } = require('./post');
+const routes = require('./routes/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
-app.use(express.json());
-app.post('/', async (req, res) => {
-  try {
-    const { name, avatar, about } = req.body;
-    const user = await userSchema.create({ name, avatar, about });
-    // eslint-disable-next-line no-console
-    console.log(req.body);
-    res.status(200).json(user);
-  } catch (e) {
-    res.json(e);
-  }
+
+mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
 });
 
-async function startApp() {
-  try {
-    await mongoose.connect('mongodb://localhost:27017/mestod');
-    app.listen(PORT, () => {
-      // eslint-disable-next-line no-console
-      console.log(`Ссылка на сервер: http://localhost:${PORT}`);
-    });
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
-}
+const cardSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+  link: {
+    type: String,
+    required: true,
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true,
+  },
+  likes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'user',
+    default: [],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-startApp();
+app.use('/', routes);
 
-// mongoose.connect('mongodb://localhost:27017/mestodb', {
-//   useNewUrlParser: true,
-//   useCreateIndex: true,
-//   useFindAndModify: false,
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log('Ссылка на сервер:');
+});
+
+// app.get('/users', (req, res) => {
+//   res.send(userSchema);
 // });
 
-// const userSchema = new mongoose.Schema({
-//   name: {
-//     type: String,
-//     required: true,
-//     minlength: 2,
-//     maxlength: 30,
-//   },
-//   avatar: {
-//     type: String,
-//     required: true,
-//   },
-//   about: {
-//     type: String,
-//     required: true,
-//     minlength: 2,
-//     maxlength: 30,
-//   },
-// });
+// app.get('/users/:userId',);
 
-// module.exports = mongoose.model('user', userSchema);
+// app.post('/users', createUser);
 
-// const cardSchema = new mongoose.Schema({
-//   name: {
-//     type: String,
-//     required: true,
-//     minlength: 2,
-//     maxlength: 30,
-//   },
-//   link: {
-//     type: String,
-//     required: true,
-//   },
-//   owner: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'user',
-//     required: true,
-//   },
-//   likes: {
-//     type: [mongoose.Schema.Types.ObjectId],
-//     ref: 'user',
-//     default: [],
-//   },
-//   createdAt: {
-//     type: Date,
-//     default: Date.now,
-//   },
-// });
-
-// module.exports = mongoose.model('card', cardSchema);
+module.exports = mongoose.model('card', cardSchema);

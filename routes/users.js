@@ -1,7 +1,9 @@
-// const router = require("express").Router();
-// const User = require('../app'),
+const router = require('express').Router();
+const { getUsers, getUsersById } = require('../controllers/users');
 
-// router.get("/users", getUsers);
+router.get('/users', getUsers);
+router.get('/users/:id', getUsersById);
+router.post('./users', createUser)
 // router.get("/users/me", getMyInfo);
 
 // router.get("/users/:userId", celebrate({
@@ -10,4 +12,4 @@
 //   }),
 // }), getUserByID);
 
-// module.exports = router;
+module.exports = router;
