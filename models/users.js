@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    minlength: 2,
+    minlength: [2, "Минимальная длина поля 'name' - 2 символа."],
     maxlength: 30,
   },
   avatar: {
