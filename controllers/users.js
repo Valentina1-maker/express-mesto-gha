@@ -1,6 +1,6 @@
 const User = require('../models/users');
-const BadRequestError = require("../errors/bad-request-err");
-const NotFoundError = require("../errors/not-found-err");
+
+
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -13,9 +13,7 @@ module.exports.getUsersById = (req, res) => {
     .then(users => res.send({ data: users }))
     .catch((err) => {
       if (err.name === "CastError") {
-        next(new BadRequestError("Переданы некорректные данные."));
-      } else if (err.message === "IncorrectID") {
-        next(new NotFoundError(`Карточка с указанным _id: ${req.params.userId} не найдена.`));
+        res.status(400).send({ message: 'Переданы некорректные данные'});
       } else {
         next(err);
       }
@@ -27,7 +25,7 @@ module.exports.createUser = (req, res) => {
   User.create({ name, avatar, about })
     .then(users => res.send({ data: users }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя'});
       }
       res.status(500).send({ message: 'Произошла ошибка' });
