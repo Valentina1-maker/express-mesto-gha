@@ -1,6 +1,6 @@
 const User = require('../models/users');
-
-
+const BadRequestError = require("../errors/bad-request-err");
+const NotFoundError = require("../errors/not-found-err");
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -13,7 +13,9 @@ module.exports.getUsersById = (req, res) => {
     .then(users => res.send({ data: users }))
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(400).send({ message: 'Переданы некорректные данные'});
+        next(new BadRequestError("Переданы некорректные данные"));
+      } else if (err.message === "IncorrectID") {
+        next(new NotFoundError(`Карточка с указанным _id: ${req.params.userId} не найдена.`));
       } else {
         next(err);
       }
@@ -25,11 +27,12 @@ module.exports.createUser = (req, res) => {
   User.create({ name, avatar, about })
     .then(users => res.send({ data: users }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя'});
+      if (err.name === "ValidationError") {
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(" ")}`));
+      } else {
+        next(err);
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
-    })
+    });
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -38,12 +41,12 @@ module.exports.updateAvatar = (req, res) => {
     { avatar })
     .then((user) => { res.status(200).send(user); })
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
-  };
+};
 
-  module.exports.updateProfile = (req, res) => {
-    const { name, about } = req.body;
-    User.findByIdAndUpdate(req.user._id,
-      { name, about })
-      .then((user) => { res.status(200).send(user); })
-      .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
-  };
+module.exports.updateProfile = (req, res) => {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id,
+    { name, about })
+    .then((user) => { res.status(200).send(user); })
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+};
