@@ -8,7 +8,7 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.getUsersById = (req, res) => {
+module.exports.getUsersById = (req, res, next) => {
   User.findById(req.params.userId)
     .then(users => res.send({ data: users }))
     .catch((err) => {
@@ -22,7 +22,7 @@ module.exports.getUsersById = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, about } = req.body
   User.create({ name, avatar, about })
     .then(users => res.send({ data: users }))
