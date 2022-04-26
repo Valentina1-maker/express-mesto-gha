@@ -9,7 +9,13 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUsersById = (req, res) => {
   User.findById(req.params.userId)
     .then(users => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+        return
+      }
+      return res.status(500).send({ message: 'Произошла ошибка' });
+    })
 };
 
 
