@@ -59,7 +59,6 @@ module.exports.updateAvatar = (req, res) => {
     })
 };
 
-
 module.exports.updateProfile = (req, res) => {
   const { name, about, id: _id } = req.body;
   User.findByIdAndUpdate(_id,{ name, about })
@@ -70,9 +69,12 @@ module.exports.updateProfile = (req, res) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.message === "IncorrectID") {
+      if (err.errors && Object.keys(err.errors).length) {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === "IncorrectID") {
         res.status(404)(`Пользователь с указанным _id не найден.`);
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
     })
 };
