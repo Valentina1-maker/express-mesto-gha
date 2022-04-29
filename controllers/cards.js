@@ -6,19 +6,40 @@ module.exports.getCards = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-
 module.exports.deleteCardById = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
-    .then(() => res.send({ message: `Карточка c _id: ${req.params.cardId} успешно удалена.` }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  Card.findByIdAndDelete(req.params.cardId, { runValidators: true })
+    .then((result) => {
+      if (result) {
+        res.send({message: `Карточка c _id: ${req.params.cardId} успешно удалена.` })
+      } else {
+        res.status(404).send({ message: 'Карточки с таким id несуществует' });
+      }
+    })
+    .catch((e) => {
+      if (e.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({message: 'Произошла ошибка'})
+      }
+    });
 };
 
 module.exports.createCard = (req, res) => {
-  const { name, link, id: _id } = req.body
+  const { name, link, owner } = req.body
 
-  Card.create({ name, link, owner: _id })
-    .then(card => res.send({ card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  Card.create({ name, link, owner })
+    .then(card => {
+      // eslint-disable-next-line no-console
+      console.log(card)
+      res.send({ card })
+    })
+    .catch((e) => {
+      if (e.errors && Object.keys(e.errors).length) {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({message: 'Произошла ошибка'})
+      }
+    });
 };
 
 module.exports.likeCard = (req, res) => {
