@@ -45,12 +45,12 @@ module.exports.createUser = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then(([user]) => {
+    .then((user) => {
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err.message === "IncorrectID") {
-        res.status(404)(`Пользователь с указанным _id не найден.`);
+        res.status(404).send({ message: `Пользователь с указанным _id не найден.` });
       }
       res.status(500).send({ message: 'Произошла ошибка' });
     })
@@ -61,7 +61,7 @@ module.exports.updateProfile = (req, res) => {
   User.findByIdAndUpdate(req.user._id,{ name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        res.status(200).send([user]);
+        res.status(200).send(user);
       } else {
         res.status(404).send({ message: 'Пользователь с указанным _id не найден.'});
       }
