@@ -25,9 +25,9 @@ module.exports.deleteCardById = (req, res) => {
 };
 
 module.exports.createCard = (req, res) => {
-  const { name, link, owner } = req.body
+  const { name, link } = req.body
 
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner: req.user._id })
     .then(card => {
       // eslint-disable-next-line no-console
       console.log(card)
@@ -43,12 +43,11 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.likeCard = (req, res) => {
-  const { userId } = req.body
   const { cardId } = req.params
 
   Card.findByIdAndUpdate(
     cardId,
-    { $addToSet: { likes: userId } }, // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true, runValidators: true },
   )
     .then((card) => {
@@ -70,12 +69,11 @@ module.exports.likeCard = (req, res) => {
 }
 
 module.exports.dislikeCard = (req, res) => {
-  const { userId } = req.body
   const { cardId } = req.params
 
   Card.findByIdAndUpdate(
     cardId,
-    { $pull: { likes: userId } }, // добавить _id в массив, если его там нет
+    { $pull: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true, runValidators: true },
   )
     .then((card) => {

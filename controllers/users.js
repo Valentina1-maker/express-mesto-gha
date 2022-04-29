@@ -43,11 +43,8 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
-  const { avatar, id: _id } = req.body;
-  User.findByIdAndUpdate(_id,{ avatar }, { runValidators: true })
-    .then(() => {
-      return User.find({ _id })
-    })
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then(([user]) => {
       res.status(200).send(user);
     })
@@ -60,19 +57,20 @@ module.exports.updateAvatar = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  const { name, about, id: _id } = req.body;
-  User.findByIdAndUpdate(_id,{ name, about }, { runValidators: true })
-    .then(() => {
-      return User.find({ _id })
-    })
-    .then(([user]) => {
-      res.status(200).send(user);
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id,{ name, about }, { new: true, runValidators: true })
+    .then((user) => {
+      if (user) {
+        res.status(200).send([user]);
+      } else {
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден.'});
+      }
     })
     .catch((err) => {
       if (err.errors && Object.keys(err.errors).length) {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else if (err.message === "IncorrectID") {
-        res.status(404)(`Пользователь с указанным _id не найден.`);
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден.'});
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
