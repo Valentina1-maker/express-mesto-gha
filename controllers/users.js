@@ -27,11 +27,12 @@ module.exports.createUser = (req, res) => {
   const { name, avatar, about } = req.body
   User.create({ name, avatar, about })
     .then(user => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
+    .catch((e) => {
+      if (e.errors && Object.keys(e.errors).length) {
         res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
     })
 };
 
