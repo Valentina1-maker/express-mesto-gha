@@ -24,7 +24,7 @@ app.post(
   celebrate({
     [Segments.BODY]: {
       name: Joi.string().min(2).max(30),
-      email: Joi.string().min(2).max(30),
+      email: Joi.string().required().min(2).max(30),
       about: Joi.string(),
       password: Joi.string().required().min(2),
       avatar: Joi.string(),
