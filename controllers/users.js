@@ -1,9 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { Joi } = require('celebrate');
 const User = require('../models/users');
-
-// const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUsers = (req, res) => User.find({})
   .then((users) => res.send(users));
