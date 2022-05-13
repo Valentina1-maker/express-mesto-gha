@@ -1,42 +1,32 @@
-const mongoose = require('mongoose');
-const { isEmail, isURL } = require('validator');
+const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
+const {
+  getUsers, getMyInfo, getUserById, createUser, updateProfile, updateAvatar,
+} = require('../controllers/users');
+// eslint-disable-next-line import/no-unresolved
+const regExp = require('../regExp/regExp');
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    minlength: 2,
-    maxlength: 30,
-    default: 'Жак-Ив Кусто',
-  },
-  avatar: {
-    type: String,
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    validate: {
-      validator: (v) => isURL(v),
-      message: 'Неправильный формат URL',
-    },
-  },
-  about: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-    default: 'Исследователь',
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-    validate: {
-      validator: (v) => isEmail(v),
-      message: 'Неправильный формат почты',
-    },
-  },
-  password: {
-    type: String,
-    required: true,
-    select: false,
-  },
-});
+router.get('/users', getUsers);
+router.get('/users/me', getMyInfo);
+router.get('/users/:userId', celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().length(24).hex(),
+  }),
+}), getUserById);
 
-module.exports = mongoose.model('user', userSchema);
+router.patch('/users/me', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+  }),
+}), updateProfile);
+
+router.patch('/users/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().required().pattern(regExp),
+  }),
+}), updateAvatar);
+
+router.post('/users', createUser);
+
+module.exports = router;
