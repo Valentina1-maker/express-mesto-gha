@@ -3,7 +3,6 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getUsers, getMyInfo, getUserById, createUser, updateProfile, updateAvatar,
 } = require('../controllers/users');
-// eslint-disable-next-line import/no-unresolved
 const regExp = require('../regExp/regExp');
 
 router.get('/users', getUsers);

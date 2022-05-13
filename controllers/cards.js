@@ -29,8 +29,6 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
-      // eslint-disable-next-line no-console
-      console.log(card);
       res.send({ card });
     })
     .catch((e) => {
