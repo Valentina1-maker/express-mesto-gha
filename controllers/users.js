@@ -63,6 +63,8 @@ module.exports.login = (req, res) => {
       return bcrypt.compare(password, user.password);
     })
     .then((matched) => {
+      // eslint-disable-next-line no-console
+      console.log('bba');
       if (!matched) {
         // хеши не совпали — отклоняем промис
         Promise.reject(new Error('Неправильные почта или пароль'));
