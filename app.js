@@ -11,6 +11,7 @@ const {
 } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const regExp = require('./regExp/regExp');
 const errorHandler = require('./middlewares/error');
 
 app.use(bodyParser.json());
@@ -26,8 +27,8 @@ app.post(
       name: Joi.string().min(2).max(30),
       email: Joi.string().required().min(2).max(30),
       about: Joi.string().min(2).max(30),
-      password: Joi.string().required().min(2),
-      avatar: Joi.string(),
+      password: Joi.string().required().min(8),
+      avatar: Joi.string().pattern(regExp),
     },
   }),
   createUser,
