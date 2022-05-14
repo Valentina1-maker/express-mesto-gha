@@ -22,20 +22,17 @@ module.exports.createUser = (req, res) => {
     name, avatar, about, email, password,
   } = req.body;
 
-  User.findOne({ email }).then((user) => {
-    if (user) {
-      res.status(409).send('Пользователь с указанным email уже есть');
-    } else {
-      res.send(user);
-    }
-  });
-
   return bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, avatar, about, email, password: hash,
     }))
-    .then((user) => User.findById(user.id))
-    .then((user) => res.send(user));
+    .then((user) => {
+      if (user) {
+        res.status(409).send({ message: 'Пользователь с указанным _id не найден.' });
+      } else {
+        res.status(200).send(user);
+      }
+    });
 };
 
 module.exports.updateAvatar = (req, res) => {
