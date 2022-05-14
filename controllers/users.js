@@ -24,7 +24,7 @@ module.exports.createUser = (req, res) => {
 
   User.findOne({ email }).then((user) => {
     if (user) {
-      res.status(404).send('Пользователь с таким email уже существует');
+      Promise.reject(new Error('Пользователь с таким email уже существует'));
     }
   });
 
