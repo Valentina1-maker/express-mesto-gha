@@ -7,12 +7,25 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCardById = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
-    .orFail(
-      () => new Error(`Пользователь с таким _id ${req.params.cardId} не найден`),
-    )
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(404).send({ error: err.message }));
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Карточки с таким id несуществует' });
+      }
+      if (card.owner._id.toString() !== req.user._id.toString()) {
+        res.status(403)('Эта карточка не Ваша и удалить ее не можете');
+      } else {
+        card.remove();
+        res.status(200).send({ message: 'Карточка успешно удалена' });
+      }
+    })
+    .catch((e) => {
+      if (e.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.createCard = (req, res) => {
