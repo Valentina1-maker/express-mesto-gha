@@ -19,7 +19,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.post('/signin', login);
+app.post(
+  '/signin',
+  celebrate({
+    [Segments.BODY]: {
+      email: Joi.string().email().required(),
+      password: Joi.string().required().min(8),
+    },
+  }),
+  login,
+);
+
 app.post(
   '/signup',
   celebrate({
