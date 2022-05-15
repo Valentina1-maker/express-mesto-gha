@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const CommonError = require('../errors/CommonError');
 const User = require('../models/users');
 
 module.exports.getUsers = (req, res) => User.find({})
@@ -62,24 +63,24 @@ module.exports.updateProfile = (req, res) => {
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  return User.findOne({ email }).select('+password')
+  return User.findOne({ email })
+    .select('+password')
     .then((user) => {
-      if (!user) {
-        // пользователь не найден — отклоняем промис
-        // с ошибкой и переходим в блок catch
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+      if (user) {
+        return bcrypt.compare(password, user.password);
       }
-      return bcrypt.compare(password, user.password);
+      return Promise.reject(new CommonError(401, 'Неправильные почта или пароль'));
     })
     .then((matched) => {
-      if (!matched) {
-        // хеши не совпали — отклоняем промис
-        Promise.reject(new Error('Неправильные почта или пароль'));
-      } else {
+      if (matched) {
         const token = jwt.sign({ _id: User._id }, 'some-secret-key', { expiresIn: '7d' });
         res.status(201).send({ token });
+      } else {
+        // хеши не совпали — отклоняем промис
+        throw new CommonError(401, 'Неправильные почта или пароль');
       }
-    });
+    })
+    .catch(next);
 };

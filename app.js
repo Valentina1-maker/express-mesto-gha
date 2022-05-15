@@ -52,11 +52,11 @@ app.use('/', require('./routes/cards'));
 // celebrate errors
 app.use(celebrateError());
 
-app.use(errorHandler);
-
 app.use((req, res) => {
   res.status(404).send({ message: 'Страница не найдена' });
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
