@@ -6,7 +6,7 @@ module.exports.getCards = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.deleteCardById = (req, res) => {
+module.exports.deleteCardById = (req, res, next) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
       if (card.owner.toString() === req.user._id.toString()) {
@@ -19,8 +19,10 @@ module.exports.deleteCardById = (req, res) => {
     .catch((e) => {
       if (e.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (e.message === 'IncorrectCardID') {
+        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(e);
       }
     });
 };
