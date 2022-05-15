@@ -12,12 +12,12 @@ module.exports.deleteCardById = (req, res) => {
       if (result) {
         res.send({ message: `Карточка c _id: ${req.params.cardId} успешно удалена.` });
       } else {
-        res.status(403).send({ message: 'Карточки с таким id несуществует' });
+        res.status(404).send({ message: 'Карточки с таким id несуществует' });
       }
     })
     .catch((e) => {
       if (e.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        res.status(403).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
