@@ -81,7 +81,7 @@ module.exports.dislikeCard = (req, res, next) => {
       if (card) {
         res.status(200).send([card]);
       } else {
-        next(new CommonError(400, 'Карточка с указанным _id не найдена.'));
+        next(new CommonError(404, 'Карточка с указанным _id не найдена.'));
       }
     })
     .catch((err) => {
