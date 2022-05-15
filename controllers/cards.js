@@ -12,6 +12,8 @@ module.exports.deleteCardById = (req, res) => {
       if (!card) {
         res.status(404).send({ message: 'Карточки с таким id несуществует' });
       }
+    })
+    .then((card) => {
       if (card.owner._id.toString() !== req.user._id.toString()) {
         res.status(403)('Эта карточка не Ваша и удалить ее не можете');
       } else {
