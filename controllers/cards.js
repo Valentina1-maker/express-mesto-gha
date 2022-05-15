@@ -12,11 +12,12 @@ module.exports.deleteCardById = (req, res) => {
       if (!card) {
         res.status(404).send({ message: 'Карточки с таким id несуществует' });
       }
-      if (card.owner._id.toString() === req.user._id.toString()) {
+
+      if (card.owner._id === req.user._id) {
         card.remove();
         res.status(200).send({ message: 'Карточка успешно удалена' });
       } else {
-        res.status(403)('Эта карточка не Ваша и удалить ее не можете');
+        res.status(403).send('Эта карточка не Ваша и удалить ее не можете');
       }
     })
     .catch((e) => {
