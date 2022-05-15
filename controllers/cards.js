@@ -11,14 +11,14 @@ module.exports.deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточки с таким id несуществует' });
+        next(new CommonError(404, 'Карточки с таким id несуществует'));
       }
 
       if (String(card.owner._id) === req.user._id) {
         card.remove();
         res.status(200).send({ message: 'Карточка успешно удалена' });
       } else {
-        res.status(403).send({ message: 'Эта карточка не Ваша и удалить ее не можете' });
+        next(new CommonError(403, 'Эта карточка не Ваша и удалить ее не можете'));
       }
     })
     .catch((e) => {
