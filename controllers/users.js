@@ -69,13 +69,13 @@ module.exports.login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (user) {
-        return bcrypt.compare(password, user.password);
+        return [bcrypt.compare(password, user.password), user];
       }
       return Promise.reject(new CommonError(401, 'Неправильные почта или пароль'));
     })
-    .then((matched) => {
+    .then(([matched, user]) => {
       if (matched) {
-        const token = jwt.sign({ _id: User._id }, 'some-secret-key', { expiresIn: '7d' });
+        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
         res.status(200).send({ token });
       } else {
         // хеши не совпали — отклоняем промис
