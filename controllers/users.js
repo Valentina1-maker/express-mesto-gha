@@ -76,7 +76,7 @@ module.exports.login = (req, res, next) => {
     .then((matched) => {
       if (matched) {
         const token = jwt.sign({ _id: User._id }, 'some-secret-key', { expiresIn: '7d' });
-        res.status(201).send({ token });
+        res.status(200).send({ token });
       } else {
         // хеши не совпали — отклоняем промис
         throw new CommonError(401, 'Неправильные почта или пароль');
