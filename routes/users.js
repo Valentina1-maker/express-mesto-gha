@@ -24,6 +24,12 @@ router.patch('/users/me/avatar', celebrate({
   }),
 }), updateAvatar);
 
-router.post('/users', createUser);
+router.post('/users', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+    avatar: Joi.string().pattern(regExp),
+  }),
+}), createUser);
 
 module.exports = router;
