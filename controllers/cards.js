@@ -6,23 +6,21 @@ module.exports.getCards = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.deleteCardById = (req, res, next) => {
+module.exports.deleteCardById = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
       if (card.owner.toString() === req.user._id.toString()) {
         card.remove();
         res.status(200).send({ message: `Карточка c _id: ${req.params.cardId} успешно удалена.` });
+      } else if (!card) {
+        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
       } else {
-        res.status(404).send({ message: `Карточку c _id: ${req.params.cardId} создал другой пользователь. Невозможно удалить.` });
+        res.status(403).send({ message: `Карточку c _id: ${req.params.cardId} создал другой пользователь. Невозможно удалить.` });
       }
     })
     .catch((e) => {
       if (e.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else if (e.message === 'IncorrectCardID') {
-        res.status(403).send({ message: 'Карточка с указанным _id не найдена.' });
-      } else {
-        next(e);
       }
     });
 };
