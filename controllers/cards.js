@@ -1,3 +1,4 @@
+const CommonError = require('../errors/CommonError');
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
@@ -6,7 +7,7 @@ module.exports.getCards = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.deleteCardById = (req, res) => {
+module.exports.deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
@@ -22,14 +23,14 @@ module.exports.deleteCardById = (req, res) => {
     })
     .catch((e) => {
       if (e.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        next(new CommonError(400, 'Переданы некорректные данные'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(new Error());
       }
     });
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
@@ -37,14 +38,14 @@ module.exports.createCard = (req, res) => {
     })
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        next(new CommonError(400, 'Переданы некорректные данные'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(new Error());
       }
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(
@@ -56,19 +57,19 @@ module.exports.likeCard = (req, res) => {
       if (card) {
         res.status(200).send([card]);
       } else {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new CommonError(404, 'Карточка с указанным _id не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        next(new CommonError(400, 'Переданы некорректные данные'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(new Error());
       }
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(
@@ -80,16 +81,16 @@ module.exports.dislikeCard = (req, res) => {
       if (card) {
         res.status(200).send([card]);
       } else {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new CommonError(400, 'Карточка с указанным _id не найдена.'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        next(new CommonError(400, 'Переданы некорректные данные'));
       } else if (err.message === 'IncorrectID') {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new CommonError(404, 'Карточка с указанным _id не найдена.'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(new Error());
       }
     });
 };
