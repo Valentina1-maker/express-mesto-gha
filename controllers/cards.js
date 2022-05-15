@@ -13,14 +13,14 @@ module.exports.deleteCardById = (req, res, next) => {
         card.remove();
         res.status(200).send({ message: `Карточка c _id: ${req.params.cardId} успешно удалена.` });
       } else {
-        res.status(403).send({ message: `Карточку c _id: ${req.params.cardId} создал другой пользователь. Невозможно удалить.` });
+        res.status(404).send({ message: `Карточку c _id: ${req.params.cardId} создал другой пользователь. Невозможно удалить.` });
       }
     })
     .catch((e) => {
       if (e.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else if (e.message === 'IncorrectCardID') {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(403).send({ message: 'Карточка с указанным _id не найдена.' });
       } else {
         next(e);
       }
