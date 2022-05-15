@@ -22,25 +22,21 @@ module.exports.createUser = (req, res) => {
     name, avatar, about, email, password,
   } = req.body;
 
-  User.findOne({ email }).then((user) => {
-    if (!user) {
-      res.send(user);
-    } else {
-      res.status(409).send({ message: 'Пользователь с указанным email уже есть' });
-    }
-  });
-
-  return bcrypt.hash(password, 10)
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        res.status(409).send({ message: 'Пользователь с указанным email уже есть' });
+      }
+    })
+    .then(() => bcrypt.hash(password, 10))
     .then((hash) => User.create({
       name, avatar, about, email, password: hash,
     }))
     .then((user) => res.send({
-      user: {
-        email: user.email,
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-      },
+      email: user.email,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
     }));
 };
 
