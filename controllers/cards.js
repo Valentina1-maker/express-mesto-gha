@@ -12,7 +12,7 @@ module.exports.deleteCardById = (req, res) => {
       if (result) {
         res.send({ message: `Карточка c _id: ${req.params.cardId} успешно удалена.` });
       } else {
-        res.status(404).send({ message: 'Карточки с таким id несуществует' });
+        res.status(403).send({ message: 'Карточки с таким id несуществует' });
       }
     })
     .catch((e) => {
