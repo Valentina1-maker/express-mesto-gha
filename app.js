@@ -9,6 +9,7 @@ app.use(express.json());
 const {
   celebrate, Joi, errors: celebrateError, Segments,
 } = require('celebrate');
+const CommonError = require('./errors/CommonError');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const regExp = require('./regExp/regExp');
@@ -24,7 +25,7 @@ app.post(
   celebrate({
     [Segments.BODY]: {
       email: Joi.string().email().required(),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
     },
   }),
   login,
@@ -37,7 +38,7 @@ app.post(
       name: Joi.string().min(2).max(30),
       email: Joi.string().required().email(),
       about: Joi.string().min(2).max(30),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
       avatar: Joi.string().pattern(regExp),
     },
   }),
@@ -52,8 +53,8 @@ app.use('/', require('./routes/cards'));
 // celebrate errors
 app.use(celebrateError());
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Страница не найдена' });
+app.use((req, res, next) => {
+  next(new CommonError(404, 'Страница не найдена'));
 });
 
 app.use(errorHandler);

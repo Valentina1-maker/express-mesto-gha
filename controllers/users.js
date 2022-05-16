@@ -3,22 +3,30 @@ const jwt = require('jsonwebtoken');
 const CommonError = require('../errors/CommonError');
 const User = require('../models/users');
 
-module.exports.getUsers = (req, res) => User.find({})
-  .then((users) => res.send(users));
+module.exports.getUsers = (req, res, next) => User.find({})
+  .then((users) => res.send(users))
+  .catch(next);
 
-module.exports.getUserById = (req, res) => User.findById(req.params.userId)
+module.exports.getUserById = (req, res, next) => User.findById(req.params.userId)
   .then((user) => {
     if (user) {
       res.send(user);
     } else {
-      res.status(404).send({ message: `Пользователь с указанным _id: ${req.params.userId} не найден.` });
+      next(new CommonError(404, `Пользователь с указанным _id: ${req.params.userId} не найден.`));
+    }
+  })
+  .catch((e) => {
+    if (e.name === 'CastError') {
+      next(new CommonError(400, 'Некорректный тип id'));
+    } else {
+      next(new Error());
     }
   });
 
 module.exports.getMyInfo = (req, res) => User.findById(req.user._id)
   .then((user) => { res.status(200).send(user); });
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, avatar, about, email, password,
   } = req.body;
@@ -26,7 +34,7 @@ module.exports.createUser = (req, res) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        res.status(409).send({ message: 'Пользователь с указанным email уже есть' });
+        next(new CommonError(409, 'Пользователь с указанным email уже есть'));
       }
     })
     .then(() => bcrypt.hash(password, 10))
@@ -38,19 +46,33 @@ module.exports.createUser = (req, res) => {
       name: user.name,
       about: user.about,
       avatar: user.avatar,
-    }));
+    }))
+    .catch((e) => {
+      if (e.name === 'ValidationError') {
+        next(new CommonError(400, 'Переданы некорректные данные'));
+      } else {
+        next(new Error());
+      }
+    });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       res.status(200).send(user);
+    })
+    .catch((e) => {
+      if (e.name === 'ValidationError') {
+        next(new CommonError(400, 'Переданы некорректные данные'));
+      } else {
+        next(new Error());
+      }
     });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -58,9 +80,10 @@ module.exports.updateProfile = (req, res) => {
       if (user) {
         res.status(200).send(user);
       } else {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
+        next(new CommonError(404, 'Пользователь с указанным _id не найден.'));
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {

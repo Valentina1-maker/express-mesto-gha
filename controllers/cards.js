@@ -4,22 +4,18 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .next(new Error());
 };
 
 module.exports.deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail(() => new CommonError(404, 'Карточки с таким id несуществует'))
     .then((card) => {
-      if (!card) {
-        next(new CommonError(404, 'Карточки с таким id несуществует'));
-      }
-
       if (String(card.owner._id) === req.user._id) {
-        card.remove();
-        res.status(200).send({ message: 'Карточка успешно удалена' });
-      } else {
-        next(new CommonError(403, 'Эта карточка не Ваша и удалить ее не можете'));
+        return next(new CommonError(403, 'Эта карточка не Ваша и удалить ее не можете'));
       }
+      return card.remove()
+        .then(() => res.send({ message: 'Карточка успешно удалена' }));
     })
     .catch((e) => {
       if (e.name === 'CastError') {
