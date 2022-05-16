@@ -1,10 +1,10 @@
 const CommonError = require('../errors/CommonError');
 const Card = require('../models/card');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .next(new Error());
+    .catch(next);
 };
 
 module.exports.deleteCardById = (req, res, next) => {
