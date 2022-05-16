@@ -34,7 +34,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new CommonError(409, 'Пользователь с указанным email уже есть');
+        next(new CommonError(409, 'Пользователь с указанным email уже есть'));
       }
     })
     .then(() => bcrypt.hash(password, 10))
