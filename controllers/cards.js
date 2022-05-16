@@ -9,9 +9,9 @@ module.exports.getCards = (req, res, next) => {
 
 module.exports.deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(() => new CommonError(404, 'Карточки с таким id несуществует'))
+    .orFail(() => new CommonError(404, 'Карточки с таким id не существует'))
     .then((card) => {
-      if (String(card.owner._id) === req.user._id) {
+      if (String(card.owner._id) !== req.user._id) {
         return next(new CommonError(403, 'Эта карточка не Ваша и удалить ее не можете'));
       }
       return card.remove()
