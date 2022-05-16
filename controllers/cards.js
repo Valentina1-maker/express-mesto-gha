@@ -15,7 +15,7 @@ module.exports.deleteCardById = (req, res, next) => {
         return next(new CommonError(403, 'Эта карточка не Ваша и удалить ее не можете'));
       }
       return card.remove()
-        .then(() => res.send({ message: 'Карточка успешно удалена' }));
+        .then(() => res.status(200).send({ message: 'Карточка успешно удалена' }));
     })
     .catch((e) => {
       if (e.name === 'CastError') {
