@@ -91,19 +91,20 @@ module.exports.login = (req, res, next) => {
   return User.findOne({ email })
     .select('+password')
     .then((user) => {
-      if (user) {
-        return [bcrypt.compare(password, user.password), user];
-      }
-      return Promise.reject(new CommonError(401, 'Неправильные почта или пароль'));
-    })
-    .then(([matched, user]) => {
-      if (matched) {
-        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-        res.status(200).send({ token });
-      } else {
-        // хеши не совпали — отклоняем промис
+      if (!user) {
         throw new CommonError(401, 'Неправильные почта или пароль');
       }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new CommonError(401, 'Неправильные почта или пароль');
+          }
+          return user;
+        });
+    })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.status(200).send({ token });
     })
     .catch(next);
 };
