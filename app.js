@@ -15,9 +15,11 @@ const auth = require('./middlewares/auth');
 const regExp = require('./regExp/regExp');
 const errorHandler = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
