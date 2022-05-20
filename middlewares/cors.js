@@ -19,8 +19,8 @@ module.exports = (req, res, next) => {
     res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
     res.header('Access-Control-Allow-Headers', requestHeaders);
 
-    res.end();
+    return res.end();
   }
 
-  next();
+  return next();
 };
